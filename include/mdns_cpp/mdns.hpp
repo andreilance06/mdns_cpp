@@ -7,8 +7,9 @@
 #include "mdns_cpp/utils.hpp"
 
 #ifdef _WIN32
-#include <iphlpapi.h>
 #include <winsock2.h>
+#include <ws2tcpip.h>
+#include <iphlpapi.h>
 #else
 #include <ifaddrs.h>
 #include <net/if.h>

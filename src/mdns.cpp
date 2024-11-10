@@ -189,7 +189,7 @@ int mDNS::openClientSockets(int *sockets, int max_sockets, int port) {
             memcmp(saddr->sin6_addr.s6_addr, localhost_mapped, 16)) {
           int log_addr = 0;
           if (first_ipv6) {
-            memcpy(service_address_ipv6_, &saddr->sin6_addr, 16);
+            memcpy(&service_address_ipv6_, &saddr->sin6_addr, sizeof(saddr->sin6_addr));
             first_ipv6 = 0;
             log_addr = 1;
           }
@@ -414,8 +414,9 @@ int service_callback(int sock, const struct sockaddr *from, size_t addrlen, mdns
       // service name we advertise, typically on the "<_service-name>._tcp.local." format
       // Answer PTR record reverse mapping "<_service-name>._tcp.local." to
       // "<hostname>.<_service-name>._tcp.local."
-      mdns_record_t answer = {
-          .name = name, .type = MDNS_RECORDTYPE_PTR, .data.ptr.name = to_mdns_str_ref(service_record->service)};
+      mdns_record_t answer = {.name = name,
+                              .type = MDNS_RECORDTYPE_PTR,
+                              .data = {mdns_record_ptr_t{name = to_mdns_str_ref(service_record->service)}}};
       // Send the answer, unicast or multicast depending on flag in query
       uint16_t unicast = (rclass & MDNS_UNICAST_RESPONSE);
       printf("  --> answer %.*s (%s)\n", MDNS_STRING_FORMAT(answer.data.ptr.name), (unicast ? "unicast" : "multicast"));
@@ -645,49 +646,51 @@ void mDNS::runMainLoop() {
 
   // PTR record reverse mapping "<_service-name>._tcp.local." to
   // "<hostname>.<_service-name>._tcp.local."
-  service_record.record_ptr = {.name = to_mdns_str_ref(service_record.service),
-                               .type = MDNS_RECORDTYPE_PTR,
-                               .data.ptr.name = to_mdns_str_ref(service_record.service_instance),
-                               .rclass = 0,
-                               .ttl = 0};
+  service_record.record_ptr.name = to_mdns_str_ref(service_record.service);
+  service_record.record_ptr.type = MDNS_RECORDTYPE_PTR,
+  service_record.record_ptr.data.ptr = mdns_record_ptr_t{.name = to_mdns_str_ref(service_record.service_instance)};
+  service_record.record_ptr.rclass = 0;
+  service_record.record_ptr.ttl = 0;
 
   // SRV record mapping "<hostname>.<_service-name>._tcp.local." to
   // "<hostname>.local." with port. Set weight & priority to 0.
-  service_record.record_srv = {.name = to_mdns_str_ref(service_record.service_instance),
-                               .type = MDNS_RECORDTYPE_SRV,
-                               .data.srv.name = to_mdns_str_ref(service_record.hostname_qualified),
-                               .data.srv.port = service_record.port,
-                               .data.srv.priority = 0,
-                               .data.srv.weight = 0,
-                               .rclass = 0,
-                               .ttl = 0};
+  service_record.record_srv.name = to_mdns_str_ref(service_record.service_instance);
+  service_record.record_srv.type = MDNS_RECORDTYPE_SRV;
+  service_record.record_srv.data.srv = mdns_record_srv_t{.priority = 0,
+                                                         .weight = 0,
+                                                         .port = service_record.port,
+                                                         .name = to_mdns_str_ref(service_record.hostname_qualified)};
+  service_record.record_srv.rclass = 0;
+  service_record.record_srv.ttl = 0;
 
   // A/AAAA records mapping "<hostname>.local." to IPv4/IPv6 addresses
-  service_record.record_a = {.name = to_mdns_str_ref(service_record.hostname_qualified),
-                             .type = MDNS_RECORDTYPE_A,
-                             .data.a.addr = service_record.address_ipv4,
-                             .rclass = 0,
-                             .ttl = 0};
-  service_record.record_aaaa = {.name = to_mdns_str_ref(service_record.hostname_qualified),
-                                .type = MDNS_RECORDTYPE_AAAA,
-                                .data.aaaa.addr = service_record.address_ipv6,
-                                .rclass = 0,
-                                .ttl = 0};
+  service_record.record_a.name = to_mdns_str_ref(service_record.hostname_qualified);
+  service_record.record_a.type = MDNS_RECORDTYPE_A;
+  service_record.record_a.data.a = {mdns_record_a_t{.addr = service_record.address_ipv4}};
+  service_record.record_a.rclass = 0;
+  service_record.record_a.ttl = 0;
+
+  service_record.record_aaaa.name = to_mdns_str_ref(service_record.hostname_qualified);
+  service_record.record_aaaa.type = MDNS_RECORDTYPE_AAAA,
+  service_record.record_aaaa.data.aaaa.addr = service_record.address_ipv6;
+  service_record.record_aaaa.rclass = 0;
+  service_record.record_aaaa.ttl = 0;
 
   // Add two test TXT records for our service instance name, will be coalesced into
   // one record with both key-value pair strings by the library
-  service_record.txt_record[0] = {.name = to_mdns_str_ref(service_record.service_instance),
-                                  .type = MDNS_RECORDTYPE_TXT,
-                                  .data.txt.key = {MDNS_STRING_CONST("test")},
-                                  .data.txt.value = {MDNS_STRING_CONST("1")},
-                                  .rclass = 0,
-                                  .ttl = 0};
-  service_record.txt_record[1] = {.name = to_mdns_str_ref(service_record.service_instance),
-                                  .type = MDNS_RECORDTYPE_TXT,
-                                  .data.txt.key = {MDNS_STRING_CONST("other")},
-                                  .data.txt.value = {MDNS_STRING_CONST("value")},
-                                  .rclass = 0,
-                                  .ttl = 0};
+  service_record.txt_record[0].name = to_mdns_str_ref(service_record.service_instance);
+  service_record.txt_record[0].type = MDNS_RECORDTYPE_TXT;
+  service_record.txt_record[0].data.txt =
+      mdns_record_txt_t{.key = {MDNS_STRING_CONST("test")}, .value = {MDNS_STRING_CONST("1")}};
+  service_record.txt_record[0].rclass = 0;
+  service_record.txt_record[0].ttl = 0;
+
+  service_record.txt_record[1].name = to_mdns_str_ref(service_record.service_instance);
+  service_record.txt_record[1].type = MDNS_RECORDTYPE_TXT;
+  service_record.txt_record[1].data.txt =
+      mdns_record_txt_t{.key = {MDNS_STRING_CONST("other")}, .value = {MDNS_STRING_CONST("value")}};
+  service_record.txt_record[1].rclass = 0;
+  service_record.txt_record[1].ttl = 0;
 
   // Send an announcement on startup of service
   {
