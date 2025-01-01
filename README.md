@@ -2,6 +2,11 @@
 
 This library provides a cross-platform mDNS and DNS-DS library in C++.
 
+__NOTES__:
+
+- This is a fork from [github.com/talaviram/mdns_cpp](https://github.com/talaviram/mdns_cpp) with small changes.
+- The fork from [github.com/talaviram/mdns_cpp](https://github.com/talaviram/mdns_cpp) is in itself already a fork from [github.com/gocarlos/mdns_cpp](https://github.com/gocarlos/mdns_cpp) containing several improvements and fixes to make it compatible again with the updates of the original C library from [github.com/mjansson/mdns](https://github.com/mjansson/mdns).
+
 Currently this library is only a C++ wrapper around Mattias Jansson ([@maniccoder](https://twitter.com/maniccoder)) [mdns.h](https://github.com/mjansson/mdns) file -> all feature credits go to him. His work is licensed with the [The Unlicense](https://github.com/mjansson/mdns/blob/master/LICENSE) license.
 
 why does this exist:
