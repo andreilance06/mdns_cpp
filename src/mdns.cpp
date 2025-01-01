@@ -407,7 +407,7 @@ int service_callback(int sock, const struct sockaddr *from, size_t addrlen, mdns
     record_name = "ANY";
   else
     return 0;
-  MDNS_LOG << "Query " << record_name << MDNS_STRING_FORMAT(name);
+  MDNS_LOG << "Query " << record_name << ":" << name.str << "(" << fromaddrstr << ")\n";
   if ((name.length == (sizeof(dns_sd) - 1)) && (strncmp(name.str, dns_sd, sizeof(dns_sd) - 1) == 0)) {
     if ((rtype == MDNS_RECORDTYPE_PTR) || (rtype == MDNS_RECORDTYPE_ANY)) {
       // The PTR query was for the DNS-SD domain, send answer with a PTR record for the
