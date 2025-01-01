@@ -47,7 +47,7 @@ class mDNS {
   std::uint16_t port_{42424};
   std::string txt_record_{};
 
-  std::atomic<bool> running_{false};
+  bool running_{false};
   bool dumpMode_{false};
 
   struct sockaddr_in service_address_ipv4_;
