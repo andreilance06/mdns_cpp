@@ -612,11 +612,11 @@ void mDNS::runMainLoop() {
   }
 
   if (name_.length() == 0) {
-    const auto msg = "Error: nvalid service name\n";
+    const auto msg = "Error: invalid service name\n";
     MDNS_LOG << msg << "\n";
     throw std::runtime_error(msg);
   }
-  if (!name_.ends_with(".")) name_ += ".";
+  if (name_[name_.length() - 1] != '.') name_ += ".";
 
   MDNS_LOG << "Opened " << std::to_string(num_sockets) << " socket" << (num_sockets > 1 ? "s" : "")
            << " for mDNS service\n";
