@@ -416,7 +416,9 @@ int service_callback(int sock, const struct sockaddr *from, size_t addrlen, mdns
       // "<hostname>.<_service-name>._tcp.local."
       mdns_record_t answer = {.name = name,
                               .type = MDNS_RECORDTYPE_PTR,
-                              .data = {mdns_record_ptr_t{name = to_mdns_str_ref(service_record->service)}}};
+                              .data = {mdns_record_ptr_t{name = to_mdns_str_ref(service_record->service)}},
+                              .rclass = MDNS_CLASS_IN,
+                              .ttl = 60};
       // Send the answer, unicast or multicast depending on flag in query
       uint16_t unicast = (rclass & MDNS_UNICAST_RESPONSE);
       printf("  --> answer %.*s (%s)\n", MDNS_STRING_FORMAT(answer.data.ptr.name), (unicast ? "unicast" : "multicast"));
