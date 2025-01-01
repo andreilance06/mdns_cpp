@@ -32,7 +32,7 @@ int main() {
 #endif
 
   mdns_cpp::Logger::setLoggerSink([](const std::string& log_msg) {
-    std::cout << "MDNS_LIBRARY: " << log_msg;
+    std::cout << "MDNS_LIBRARY: " << log_msg << "\n";
     std::flush(std::cout);
   });
 
