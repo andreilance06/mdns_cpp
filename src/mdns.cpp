@@ -44,11 +44,7 @@ int mDNS::openServiceSockets(int *sockets, int max_sockets) {
   if (num_sockets < max_sockets) {
     sockaddr_in sock_addr{};
     sock_addr.sin_family = AF_INET;
-#ifdef _WIN32
-    sock_addr.sin_addr = in4addr_any;
-#else
     sock_addr.sin_addr.s_addr = INADDR_ANY;
-#endif
     sock_addr.sin_port = htons(MDNS_PORT);
 #ifdef __APPLE__
     sock_addr.sin_len = sizeof(struct sockaddr_in);
