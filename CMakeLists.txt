@@ -45,7 +45,7 @@ else()
 endif()
 
 if(WIN32)
-  target_link_libraries(${PROJECT_NAME} INTERFACE iphlpapi ws2_32)
+  target_link_libraries(${PROJECT_NAME} PUBLIC iphlpapi ws2_32)
 endif()
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
